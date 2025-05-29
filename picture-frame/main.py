@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 import json
 import os
@@ -8,6 +10,7 @@ from threading import Thread
 from flask import Flask
 from PIL import Image, ExifTags
 from functools import lru_cache
+from server import start_flask
 
 # --- CONFIG ---
 IMAGE_FOLDER = './imgs'
@@ -16,14 +19,40 @@ FADE_DURATION = 1.0  # seconds
 FONT_SIZE = 50
 SHUFFLE = True
 LOOP = True
-with open("img_descr.json") as f:
-    IMG_DESCR = json.load(f)
+
+
+# --- INIT IMAGE DESCRIPTIONS ---
+def load_img_descr():
+    try:
+        with open("img_descr.json") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_img_descr(data):
+    with open("img_descr.json", "w") as f:
+        json.dump(data, f, indent=2)
+
+IMG_DESCR = load_img_descr()
 
 
 # --- INIT PYGAME ---
 pygame.init()
-screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+display_info = pygame.display.Info()
+full_width = display_info.current_w
+full_height = display_info.current_h
+
+# Reduce dimensions slightly (e.g., 90% of full screen)
+margin_ratio = 0.9
+window_width = int(full_width * margin_ratio)
+window_height = int(full_height * margin_ratio)
+
+# Set the window to be slightly smaller and resizable
+screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
+
+# Now you can use these for layout
 screen_width, screen_height = screen.get_size()
+
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, FONT_SIZE)
 
@@ -77,12 +106,29 @@ def fade_in(image, duration=1.0, fps=30):
     image.set_alpha(None)
 
 def draw_caption(text):
-    caption = font.render(text, True, (255, 255, 255))
-    bg = pygame.Surface((caption.get_width() + 20, caption.get_height() + 10))
-    bg.set_alpha(150)
-    bg.fill((0, 0, 0))
-    screen.blit(bg, (10, screen_height - caption.get_height() - 20))
-    screen.blit(caption, (20, screen_height - caption.get_height() - 15))
+    lines = []
+    words = text.split()
+    line = ""
+    for word in words:
+        test_line = f"{line} {word}".strip()
+        if font.size(test_line)[0] > screen_width - 40:
+            lines.append(line)
+            line = word
+        else:
+            line = test_line
+    lines.append(line)
+
+    total_height = len(lines) * (font.get_height() + 5)
+    y = screen_height - total_height - 20
+
+    for line in lines:
+        caption = font.render(line, True, (255, 255, 255))
+        bg = pygame.Surface((caption.get_width() + 20, caption.get_height() + 10))
+        bg.set_alpha(150)
+        bg.fill((0, 0, 0))
+        screen.blit(bg, (10, y))
+        screen.blit(caption, (20, y + 5))
+        y += font.get_height() + 5
 
 # # --- FLASK REMOTE CONTROL ---
 # app = Flask(__name__)
@@ -114,24 +160,43 @@ def draw_caption(text):
 # Thread(target=start_server, daemon=True).start()
 
 # --- MAIN LOOP ---
-image_files = sorted(glob(os.path.join(IMAGE_FOLDER, '*')))
+def scan_images():
+    return sorted(Path(IMAGE_FOLDER).glob("*"))
+
+image_files = scan_images()
 if SHUFFLE:
     random.shuffle(image_files)
 
 idx = 0
+image_count = 0
+REFRESH_EVERY_N_IMAGES = 10
+
 running = True
+Thread(target=start_flask, daemon=True).start()
 
 while running:
+    current_files = set(scan_images())
+    IMG_DESCR = load_img_descr()
+    if current_files != set(image_files):
+        added = current_files - set(image_files)
+        removed = set(image_files) - current_files
+        if added:
+            print(f"New images added: {[f.name for f in added]}")
+        if removed:
+            print(f"Images removed: {[f.name for f in removed]}")
+        image_files = sorted(current_files)
+        if SHUFFLE:
+            random.shuffle(image_files)
+        if idx >= len(image_files):
+            idx = 0
+
     if idx >= len(image_files):
         if LOOP:
-            image_files = sorted(glob(os.path.join(IMAGE_FOLDER, '*')))
-            if SHUFFLE:
-                random.shuffle(image_files)
             idx = 0
         else:
             break
 
-    path = image_files[idx]
+    path = str(image_files[idx])
     img = load_image(path)
     if not img:
         idx = (idx + 1) % len(image_files)
