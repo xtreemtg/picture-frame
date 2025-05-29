@@ -84,34 +84,34 @@ def draw_caption(text):
     screen.blit(bg, (10, screen_height - caption.get_height() - 20))
     screen.blit(caption, (20, screen_height - caption.get_height() - 15))
 
-# --- FLASK REMOTE CONTROL ---
-app = Flask(__name__)
-remote_command = {"action": None, "paused": False}
-
-@app.route("/next")
-def next_image():
-    remote_command["action"] = "next"
-    return "Next image"
-
-@app.route("/prev")
-def prev_image():
-    remote_command["action"] = "prev"
-    return "Previous image"
-
-@app.route("/pause")
-def pause():
-    remote_command["paused"] = True
-    return "Paused"
-
-@app.route("/resume")
-def resume():
-    remote_command["paused"] = False
-    return "Resumed"
-
-def start_server():
-    app.run(host="0.0.0.0", port=8001)
-
-Thread(target=start_server, daemon=True).start()
+# # --- FLASK REMOTE CONTROL ---
+# app = Flask(__name__)
+# remote_command = {"action": None, "paused": False}
+#
+# @app.route("/next")
+# def next_image():
+#     remote_command["action"] = "next"
+#     return "Next image"
+#
+# @app.route("/prev")
+# def prev_image():
+#     remote_command["action"] = "prev"
+#     return "Previous image"
+#
+# @app.route("/pause")
+# def pause():
+#     remote_command["paused"] = True
+#     return "Paused"
+#
+# @app.route("/resume")
+# def resume():
+#     remote_command["paused"] = False
+#     return "Resumed"
+#
+# def start_server():
+#     app.run(host="0.0.0.0", port=8001)
+#
+# Thread(target=start_server, daemon=True).start()
 
 # --- MAIN LOOP ---
 image_files = sorted(glob(os.path.join(IMAGE_FOLDER, '*')))
@@ -150,18 +150,18 @@ while running:
                 running = False
                 break
 
-        if remote_command["paused"]:
-            time.sleep(0.1)
-            continue
-
-        if remote_command["action"] == "next":
-            idx = (idx + 1) % len(image_files)
-            remote_command["action"] = None
-            break
-        elif remote_command["action"] == "prev":
-            idx = (idx - 1) % len(image_files)
-            remote_command["action"] = None
-            break
+        # if remote_command["paused"]:
+        #     time.sleep(0.1)
+        #     continue
+        #
+        # if remote_command["action"] == "next":
+        #     idx = (idx + 1) % len(image_files)
+        #     remote_command["action"] = None
+        #     break
+        # elif remote_command["action"] == "prev":
+        #     idx = (idx - 1) % len(image_files)
+        #     remote_command["action"] = None
+        #     break
 
         clock.tick(30)
     else:

@@ -1,0 +1,7 @@
+blinker==1.9.0
+click==8.1.8
+importlib_metadata==8.7.0
+itsdangerous==2.2.0
+pillow==11.2.1
+pygame==2.6.1
+zipp==3.21.0
