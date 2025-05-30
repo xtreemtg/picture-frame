@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Photo Frame</title>
+  <style>
+    body { font-family: sans-serif; }
+    .drop-area {
+      border: 2px dashed #888;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #888;
+    }
+    .drop-area.dragover {
+      border-color: #333;
+      color: #333;
+    }
+    img { max-height: 100px; display: block; margin-bottom: 10px; }
+    li { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Upload New Photo</h2>
+  <div class="drop-area" id="drop-area">
+    Drag & Drop Images Here
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+      <input type="file" name="files" id="fileElem" accept="image/*" multiple style="display:none" onchange="uploadFiles(this.files)">
+    </form>
+    <br><button id="upload-btn" onclick="document.getElementById('fileElem').click()">Browse Files</button>
+    <div id="progress" style="display:none; margin-top:10px;">
+      <label for="progressBar">Uploading... Please wait.</label>
+      <progress id="progressBar" value="0" max="100" style="width: 100%;"></progress>
+    </div>
+  </div>
+
+  {% if message %}<p style='color:red;'>{{ message }}</p>{% endif %}
+  <hr>
+  <h3>Files:</h3>
+  <ol>
+  {% for f in files %}
+    <li>
+      <img src="/imgs/{{ f }}"><br>
+      {{ f }}<br>
+      <form method="POST" action="/rename/{{ f }}">
+        <input name="newname" value="{{ descriptions.get(f, '') }}">
+        <input type="submit" value="Update Caption">
+      </form>
+      <a href="/delete/{{ f }}" onclick="return confirm('Are you sure you want to delete {{ f }}?')" style="color:red">(delete)</a>
+    </li>
+  {% endfor %}
+  </ol>
+
+<script>
+const uploadUrl = '/upload';
+function uploadFiles(files) {
+  if (!files.length) return;
+  const formData = new FormData();
+  for (let file of files) {
+    formData.append('files', file);
+  }
+  document.getElementById('progress').style.display = 'block';
+  document.getElementById('upload-btn').disabled = true;
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', uploadUrl, true);
+  xhr.upload.onprogress = function(e) {
+    if (e.lengthComputable) {
+      const percent = (e.loaded / e.total) * 100;
+      document.getElementById('progressBar').value = percent;
+    }
+  };
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      location.reload();
+    } else {
+      alert(xhr.responseText || 'Upload failed');
+      document.getElementById('progress').style.display = 'none';
+      document.getElementById('upload-btn').disabled = false;
+    }
+  };
+  xhr.send(formData);
+}
+
+dropArea = document.getElementById('drop-area');
+dropArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropArea.classList.add('dragover');
+});
+dropArea.addEventListener('dragleave', () => {
+  dropArea.classList.remove('dragover');
+});
+dropArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropArea.classList.remove('dragover');
+  uploadFiles(e.dataTransfer.files);
+});
+</script>
+</body>
+</html>
