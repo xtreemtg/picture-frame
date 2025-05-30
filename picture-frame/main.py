@@ -13,7 +13,7 @@ from functools import lru_cache
 from server import start_flask
 
 # --- CONFIG ---
-IMAGE_FOLDER = './imgs'
+IMAGE_FOLDER = './static/imgs'
 DISPLAY_TIME = 1  # seconds
 FADE_DURATION = 1.0  # seconds
 FONT_SIZE = 50
