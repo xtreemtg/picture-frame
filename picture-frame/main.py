@@ -189,6 +189,8 @@ while running:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 running = False
                 break
+            elif event.type == pygame.VIDEORESIZE:
+                screen_width, screen_height = event.size
         clock.tick(30)
     else:
         idx = (idx + 1) % len(image_files)
