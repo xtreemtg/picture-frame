@@ -1,10 +1,17 @@
 from flask import Flask, request, send_from_directory, render_template, redirect
 import os
 import json
+import yaml
 
-IMAGE_FOLDER = './static/imgs'
-IMG_DESCR_FILE = 'img_descr.json'
-MAX_IMAGES = 20
+
+
+with open("config.yaml") as f:
+    CONFIG = yaml.safe_load(f)
+
+IMG_DESCR_FILE = CONFIG.get("IMG_DESCR_FILE", "img_descr.json")
+IMAGE_FOLDER = CONFIG.get("IMAGE_FOLDER", "./static/imgs")
+MAX_IMAGES = CONFIG.get("MAX_IMAGES", 20)
+
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 

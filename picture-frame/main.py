@@ -11,14 +11,18 @@ from flask import Flask
 from PIL import Image, ExifTags
 from functools import lru_cache
 from server import start_flask
+import yaml
 
 # --- CONFIG ---
-IMAGE_FOLDER = './static/imgs'
-DISPLAY_TIME = 1  # seconds
-FADE_DURATION = 1.0  # seconds
-FONT_SIZE = 50
-SHUFFLE = True
-LOOP = True
+with open("config.yaml") as f:
+    CONFIG = yaml.safe_load(f)
+
+IMAGE_FOLDER = CONFIG.get("IMAGE_FOLDER", "./static/imgs")
+DISPLAY_TIME = CONFIG.get("DISPLAY_TIME", 1)
+FADE_DURATION = CONFIG.get("FADE_DURATION", 1.0)
+FONT_SIZE = CONFIG.get("FONT_SIZE", 50)
+SHUFFLE = CONFIG.get("SHUFFLE", True)
+LOOP = CONFIG.get("LOOP", True)
 
 
 # --- INIT IMAGE DESCRIPTIONS ---
@@ -130,34 +134,6 @@ def draw_caption(text):
         screen.blit(caption, (20, y + 5))
         y += font.get_height() + 5
 
-# # --- FLASK REMOTE CONTROL ---
-# app = Flask(__name__)
-# remote_command = {"action": None, "paused": False}
-#
-# @app.route("/next")
-# def next_image():
-#     remote_command["action"] = "next"
-#     return "Next image"
-#
-# @app.route("/prev")
-# def prev_image():
-#     remote_command["action"] = "prev"
-#     return "Previous image"
-#
-# @app.route("/pause")
-# def pause():
-#     remote_command["paused"] = True
-#     return "Paused"
-#
-# @app.route("/resume")
-# def resume():
-#     remote_command["paused"] = False
-#     return "Resumed"
-#
-# def start_server():
-#     app.run(host="0.0.0.0", port=8001)
-#
-# Thread(target=start_server, daemon=True).start()
 
 # --- MAIN LOOP ---
 def scan_images():
@@ -169,7 +145,6 @@ if SHUFFLE:
 
 idx = 0
 image_count = 0
-REFRESH_EVERY_N_IMAGES = 10
 
 running = True
 Thread(target=start_flask, daemon=True).start()
@@ -214,20 +189,6 @@ while running:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 running = False
                 break
-
-        # if remote_command["paused"]:
-        #     time.sleep(0.1)
-        #     continue
-        #
-        # if remote_command["action"] == "next":
-        #     idx = (idx + 1) % len(image_files)
-        #     remote_command["action"] = None
-        #     break
-        # elif remote_command["action"] == "prev":
-        #     idx = (idx - 1) % len(image_files)
-        #     remote_command["action"] = None
-        #     break
-
         clock.tick(30)
     else:
         idx = (idx + 1) % len(image_files)
