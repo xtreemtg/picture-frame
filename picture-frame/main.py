@@ -35,7 +35,7 @@ def load_img_descr():
 
 def save_img_descr(data):
     with open("img_descr.json", "w") as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
 IMG_DESCR = load_img_descr()
 
