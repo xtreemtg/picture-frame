@@ -14,3 +14,6 @@ def generate_thumbnails(img_dir, thumb_dir):
                 img = ImageOps.exif_transpose(img)
                 img.thumbnail((400, 400))
                 img.save(thumb_path)
+
+if __name__ == '__main__':
+    generate_thumbnails(os.path.join(os.getcwd(), "static", "imgs"), os.path.join(os.getcwd(), "static", "thumbnails"))

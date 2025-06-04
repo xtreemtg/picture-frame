@@ -3,20 +3,89 @@
 <head>
   <title>Photo Frame</title>
   <style>
-    body { font-family: sans-serif; }
-    .drop-area {
-      border: 2px dashed #888;
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
       padding: 20px;
-      margin-bottom: 20px;
+    }
+    h2, h3 {
       text-align: center;
-      color: #888;
+    }
+    .drop-area {
+      border: 2px dashed #aaa;
+      border-radius: 8px;
+      background: #fff;
+      padding: 20px;
+      margin: 0 auto 30px auto;
+      text-align: center;
+      max-width: 500px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: 0.3s;
     }
     .drop-area.dragover {
-      border-color: #333;
-      color: #333;
+      border-color: #555;
+      background-color: #f9f9f9;
     }
-    img { max-height: 100px; display: block; margin-bottom: 10px; }
-    li { margin-bottom: 20px; }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #888;
+    }
+    #progress {
+      margin-top: 10px;
+    }
+    ol {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    li {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    form {
+      margin: 5px 0;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 6px;
+      margin-bottom: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    a {
+      display: inline-block;
+      margin-top: 5px;
+      color: red;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .message {
+      text-align: center;
+      color: red;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -27,25 +96,23 @@
       <input type="file" name="files" id="fileElem" accept="image/*" multiple style="display:none" onchange="uploadFiles(this.files)">
     </form>
     <br><button id="upload-btn" onclick="document.getElementById('fileElem').click()">Browse Files</button>
-    <div id="progress" style="display:none; margin-top:10px;">
+    <div id="progress" style="display:none;">
       <label for="progressBar">Uploading... Please wait.</label>
       <progress id="progressBar" value="0" max="100" style="width: 100%;"></progress>
     </div>
   </div>
 
-  {% if message %}<p style='color:red;'>{{ message }}</p>{% endif %}
-  <hr>
-  <h3>{{ files|count  }} images. Can upload {{ max_images  - files|count }} more</h3>
+  {% if message %}<div class="message">{{ message }}</div>{% endif %}
+  <h3>Gallery</h3>
   <ol>
   {% for f in files %}
     <li>
-      <img src="/imgs/{{ f }}"><br>
-      {{ f }}<br>
+      <img src="/imgs/{{ f }}" alt="{{ f }}"><br>
       <form method="POST" action="/rename/{{ f }}">
-        <input name="newname" value="{{ descriptions.get(f, '') }}">
+        <input type="text" name="newname" value="{{ descriptions.get(f, '') }}">
         <input type="submit" value="Update Caption">
       </form>
-      <a href="/delete/{{ f }}" onclick="return confirm('Are you sure you want to delete {{ f }}?')" style="color:red">(delete)</a>
+      <a href="/delete/{{ f }}" onclick="return confirm('Are you sure you want to delete {{ f }}?')">(delete)</a>
     </li>
   {% endfor %}
   </ol>
@@ -77,6 +144,14 @@ function uploadFiles(files) {
       document.getElementById('upload-btn').disabled = false;
     }
   };
+  const timestamps = {};
+  debugger;
+  for (let i = 0;  i < files.length; i++){
+    let file = files[i];
+    formData.append('files', file);
+    timestamps[file.name] = file.lastModified;
+  }
+  formData.append('timestamps', JSON.stringify(timestamps));
   xhr.send(formData);
 }
 
