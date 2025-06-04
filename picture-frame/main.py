@@ -151,6 +151,13 @@ Thread(target=start_flask, daemon=True).start()
 
 while running:
     current_files = set(scan_images())
+    if len(current_files) == 0:
+        screen.fill((0, 0, 0)) # fill with black
+        pygame.display.update()
+        pygame.event.get()
+        clock.tick(1)
+        time.sleep(1)
+        continue
     IMG_DESCR = load_img_descr()
     if current_files != set(image_files):
         added = current_files - set(image_files)

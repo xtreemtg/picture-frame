@@ -35,7 +35,7 @@
 
   {% if message %}<p style='color:red;'>{{ message }}</p>{% endif %}
   <hr>
-  <h3>Files:</h3>
+  <h3>{{ files|count  }} images. Can upload {{ max_images  - files|count }} more</h3>
   <ol>
   {% for f in files %}
     <li>

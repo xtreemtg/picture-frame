@@ -1,4 +1,5 @@
 from flask import Flask, request, send_from_directory, render_template, redirect
+from PIL import Image, ImageOps
 import os
 import json
 import yaml
@@ -10,6 +11,7 @@ with open("config.yaml") as f:
 
 IMG_DESCR_FILE = CONFIG.get("IMG_DESCR_FILE", "img_descr.json")
 IMAGE_FOLDER = CONFIG.get("IMAGE_FOLDER", "./static/imgs")
+THUMB_FOLDER = CONFIG.get("THUMB_FOLDER", "./static/thumbnails")
 MAX_IMAGES = CONFIG.get("MAX_IMAGES", 20)
 
 
@@ -37,7 +39,7 @@ def index():
     global IMG_DESCR
     message = request.args.get('message', '')
     files = sorted(os.listdir(IMAGE_FOLDER))
-    return render_template('index.html', files=files, descriptions=IMG_DESCR, message=message)
+    return render_template('index.html', files=files, descriptions=IMG_DESCR, message=message, max_images=MAX_IMAGES)
     # files = sorted(os.listdir(IMAGE_FOLDER))
     # return render_template_string(HTML, files=files, descriptions=IMG_DESCR, message=message)
 
@@ -47,6 +49,7 @@ def delete(filename):
     global IMG_DESCR
     try:
         os.remove(os.path.join(IMAGE_FOLDER, filename))
+        os.remove(os.path.join(THUMB_FOLDER, filename))
         IMG_DESCR.pop(filename, None)
         save_img_descr(IMG_DESCR)
     except:
@@ -73,13 +76,19 @@ def upload():
         return "Image limit exceeded", 400
     for file in files:
         if file:
-            file.save(os.path.join(IMAGE_FOLDER, file.filename))
+            original_path = os.path.join(IMAGE_FOLDER, file.filename)
+            file.save(original_path)
+            thumb_path = os.path.join(THUMB_FOLDER, file.filename)
+            with Image.open(original_path) as img:
+                img = ImageOps.exif_transpose(img)
+                img.thumbnail((400, 400))
+                img.save(thumb_path)
     return "OK"
 
 
 @app.route('/imgs/<filename>')
 def get_image(filename):
-    return send_from_directory(IMAGE_FOLDER, filename)
+    return send_from_directory(THUMB_FOLDER, filename)
 
 
 def start_flask():
