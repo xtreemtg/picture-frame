@@ -24,6 +24,8 @@ FONT_SIZE = CONFIG.get("FONT_SIZE", 50)
 SHUFFLE = CONFIG.get("SHUFFLE", True)
 LOOP = CONFIG.get("LOOP", True)
 
+os.environ['SDL_VIDEO_WINDOW_POS'] = CONFIG.get("SDL_VIDEO_WINDOW_POS", "100,100")
+
 
 # --- INIT IMAGE DESCRIPTIONS ---
 def load_img_descr():
@@ -42,14 +44,16 @@ IMG_DESCR = load_img_descr()
 
 # --- INIT PYGAME ---
 pygame.init()
-display_info = pygame.display.Info()
-full_width = display_info.current_w
-full_height = display_info.current_h
+window_width, window_height = CONFIG.get("WINDOW_WIDTH"), CONFIG.get("WINDOW_HEIGHT")
+if not window_width and not window_height:
+    display_info = pygame.display.Info()
+    full_width = display_info.current_w
+    full_height = display_info.current_h
 
-# Reduce dimensions slightly (e.g., 90% of full screen)
-margin_ratio = 0.9
-window_width = int(full_width * margin_ratio)
-window_height = int(full_height * margin_ratio)
+    # Reduce dimensions slightly (e.g., 90% of full screen)
+    margin_ratio = 0.9
+    window_width = int(full_width * margin_ratio)
+    window_height = int(full_height * margin_ratio)
 
 # Set the window to be slightly smaller and resizable
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
