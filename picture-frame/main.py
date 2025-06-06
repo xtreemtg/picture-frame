@@ -44,6 +44,7 @@ IMG_DESCR = load_img_descr()
 
 # --- INIT PYGAME ---
 pygame.init()
+pygame.display.set_caption("Xtreem Picture Frame")
 window_width, window_height = CONFIG.get("WINDOW_WIDTH"), CONFIG.get("WINDOW_HEIGHT")
 if not window_width and not window_height:
     display_info = pygame.display.Info()
