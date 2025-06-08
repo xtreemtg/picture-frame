@@ -103,7 +103,7 @@
   </div>
 
   {% if message %}<div class="message">{{ message }}</div>{% endif %}
-  <h3>Gallery ({{ files|length }} photos remaining)</h3>
+  <h3>Gallery ({{ max_images - files|length }} photos remaining)</h3>
   <ol>
   {% for f in files %}
     <li>
