@@ -2,6 +2,7 @@ from flask import Flask, request, send_from_directory, render_template, redirect
 from PIL import Image, ImageOps
 import os
 import json
+import datetime
 import yaml
 
 
@@ -45,8 +46,14 @@ def index():
         key=lambda fil: os.path.getmtime(os.path.join(IMAGE_FOLDER, fil)),
         reverse=True
     )
+    dates = {
+        f: datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(IMAGE_FOLDER, f))).strftime(
+            '%Y-%m-%d %H:%M:%S')
+        for f in files
+    }
 
-    return render_template('index.html', files=files, descriptions=IMG_DESCR, message=message, max_images=MAX_IMAGES)
+    return render_template('index.html', files=files, descriptions=IMG_DESCR, message=message,
+                           dates=dates, max_images=MAX_IMAGES)
     # files = sorted(os.listdir(IMAGE_FOLDER))
     # return render_template_string(HTML, files=files, descriptions=IMG_DESCR, message=message)
 

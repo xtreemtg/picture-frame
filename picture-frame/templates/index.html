@@ -135,6 +135,7 @@ ol.gallery-list li::before {
   {% for f in files %}
     <li>
       <img src="/imgs/{{ f }}" alt="{{ f }}"><br>
+      <small style="display:block; margin: 5px 0; color: #555;">{{ dates[f] }}</small>
       <form method="POST" action="/rename/{{ f }}">
         <input type="text" name="newname" value="{{ descriptions.get(f, '') }}">
         <input type="submit" value="Update Caption">
