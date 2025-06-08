@@ -42,13 +42,40 @@
     #progress {
       margin-top: 10px;
     }
-    ol {
-      list-style: none;
-      padding: 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-    }
+
+ol.gallery-list {
+  list-style: none;
+  counter-reset: gallery-counter;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+ol.gallery-list li {
+  counter-increment: gallery-counter;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  position: relative;
+}
+
+ol.gallery-list li::before {
+  content: counter(gallery-counter);
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
     li {
       background: #fff;
       padding: 15px;
@@ -103,8 +130,8 @@
   </div>
 
   {% if message %}<div class="message">{{ message }}</div>{% endif %}
-  <h3>Gallery ({{ max_images - files|length }} photos remaining)</h3>
-  <ol>
+  <h3>Gallery (Can upload {{ max_images - files|length }} more photos)</h3>
+  <ol class="gallery-list">
   {% for f in files %}
     <li>
       <img src="/imgs/{{ f }}" alt="{{ f }}"><br>
