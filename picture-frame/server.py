@@ -1,5 +1,7 @@
 from flask import Flask, request, send_from_directory, render_template, redirect
 from PIL import Image, ImageOps
+from werkzeug.utils import secure_filename
+import exifread
 import os
 import json
 import datetime
@@ -94,8 +96,16 @@ def upload():
         if file:
             original_path = os.path.join(IMAGE_FOLDER, file.filename)
             file.save(original_path)
-            if file.filename in timestamps:
+            with open(original_path, 'rb') as f:
+                tags = exifread.process_file(f, details=False)
+            exif_datetime_str = str(tags.get('Image DateTime'))
+            ts = None
+            if exif_datetime_str:
+                exif_dt = datetime.datetime.strptime(exif_datetime_str, '%Y:%m:%d %H:%M:%S')
+                ts = exif_dt.timestamp()
+            elif file.filename in timestamps:
                 ts = int(timestamps[file.filename]) / 1000
+            if ts is not None:
                 os.utime(original_path, (ts, ts))
             thumb_path = os.path.join(THUMB_FOLDER, file.filename)
             with Image.open(original_path) as img:
