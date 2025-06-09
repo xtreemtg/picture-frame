@@ -5,6 +5,7 @@ import exifread
 import os
 import json
 import datetime
+from dateutil import parser
 import yaml
 
 
@@ -94,17 +95,27 @@ def upload():
         return "Image limit exceeded", 400
     for file in files:
         if file:
-            original_path = os.path.join(IMAGE_FOLDER, file.filename)
+            filename = file.filename
+            print(f"Uploading {filename}")
+            original_path = os.path.join(IMAGE_FOLDER, filename)
             file.save(original_path)
             with open(original_path, 'rb') as f:
                 tags = exifread.process_file(f, details=False)
-            exif_datetime_str = str(tags.get('Image DateTime'))
+            exif_datetime_str = tags.get('Image DateTime')
             ts = None
             if exif_datetime_str:
-                exif_dt = datetime.datetime.strptime(exif_datetime_str, '%Y:%m:%d %H:%M:%S')
-                ts = exif_dt.timestamp()
-            elif file.filename in timestamps:
+                try:
+                    exif_dt = datetime.datetime.strptime(str(exif_datetime_str), '%Y:%m:%d %H:%M:%S')
+                    ts = exif_dt.timestamp()
+                except (ValueError, TypeError):
+                    try:
+                        exif_dt = parser.parse(str(exif_datetime_str))
+                        ts = exif_dt.timestamp()
+                    except (ValueError, TypeError):
+                        pass
+            if ts is None and file.filename in timestamps:
                 ts = int(timestamps[file.filename]) / 1000
+
             if ts is not None:
                 os.utime(original_path, (ts, ts))
             thumb_path = os.path.join(THUMB_FOLDER, file.filename)
