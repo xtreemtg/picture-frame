@@ -126,9 +126,13 @@ def upload():
     return "OK"
 
 
+@app.route('/thumbnails/<filename>')
+def thumbnails(filename):
+    return send_from_directory(THUMB_FOLDER, filename)
+
 @app.route('/imgs/<filename>')
 def get_image(filename):
-    return send_from_directory(THUMB_FOLDER, filename)
+    return send_from_directory(IMAGE_FOLDER, filename)
 
 
 def start_flask():
