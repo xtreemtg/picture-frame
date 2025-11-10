@@ -144,7 +144,7 @@ def draw_caption(text):
 def sort_paths_by_date(paths, reverse=False):
     return sorted(
         paths,
-        key=lambda p: p.stat().st_mtime,
+        key=lambda p: p.stat().st_birthtime,
         reverse=reverse
     )
 
