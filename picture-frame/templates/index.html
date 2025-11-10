@@ -133,8 +133,8 @@ ol.gallery-list li::before {
   <h3>Gallery (Can upload {{ max_images - files|length }} more photos)</h3>
   <ol class="gallery-list">
   {% for f in files %}
-    <li>
-      <a href="/imgs/{{ f }}" target="_blank" ><img src="/thumbnails/{{ f }}" alt="{{ f }}"><br></a>
+    <li title="{{ f }}">
+      <a href="/imgs/{{ f }}" target="_blank" ><img src="/thumbnails/{{ f }}" alt="{{ f }}"></a>
       <a href="/imgs/{{ f }}" download>⬇️</a>
       <small style="display:block; margin: 5px 0; color: #555;">{{ dates[f] }}</small>
       <form method="POST" action="/rename/{{ f }}">

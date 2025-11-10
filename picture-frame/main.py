@@ -177,11 +177,11 @@ while running:
         if idx >= len(image_files):
             idx = 0
 
-    if idx >= len(image_files):
-        if LOOP:
-            idx = 0
-        else:
-            break
+    # if idx >= len(image_files):
+    #     if LOOP:
+    #         idx = 0
+    #     else:
+    #         break
 
     path = str(image_files[idx])
     img = load_image(path)
