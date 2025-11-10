@@ -16,6 +16,7 @@ import yaml
 # --- CONFIG ---
 with open("config.yaml") as f:
     CONFIG = yaml.safe_load(f)
+    print(CONFIG)
 
 IMAGE_FOLDER = CONFIG.get("IMAGE_FOLDER", "./static/imgs")
 DISPLAY_TIME = CONFIG.get("DISPLAY_TIME", 1)
