@@ -18,7 +18,7 @@ with open("config.yaml") as f:
     CONFIG = yaml.safe_load(f)
     print(CONFIG)
 
-IMAGE_FOLDER = CONFIG.get("IMAGE_FOLDER", "./static/imgs")
+IMAGE_FOLDER = Path(CONFIG.get("IMAGE_FOLDER", "./static/imgs"))
 DISPLAY_TIME = CONFIG.get("DISPLAY_TIME", 1)
 FADE_DURATION = CONFIG.get("FADE_DURATION", 1.0)
 FONT_SIZE = CONFIG.get("FONT_SIZE", 50)
@@ -141,9 +141,19 @@ def draw_caption(text):
         y += font.get_height() + 5
 
 
+def sort_paths_by_date(paths, reverse=False):
+    return sorted(
+        paths,
+        key=lambda p: p.stat().st_mtime,
+        reverse=reverse
+    )
+
 # --- MAIN LOOP ---
 def scan_images():
-    return sorted(Path(IMAGE_FOLDER).glob("*"))
+    # return sorted(Path(IMAGE_FOLDER).glob("*"))
+    imgs = sort_paths_by_date(Path(IMAGE_FOLDER).glob("*"))
+
+    return imgs
 
 image_files = scan_images()
 if SHUFFLE:
@@ -172,7 +182,7 @@ while running:
             print(f"New images added: {[f.name for f in added]}")
         if removed:
             print(f"Images removed: {[f.name for f in removed]}")
-        image_files = sorted(current_files)
+        image_files = sort_paths_by_date(current_files)
         if SHUFFLE:
             random.shuffle(image_files)
         if idx >= len(image_files):
