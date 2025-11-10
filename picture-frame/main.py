@@ -144,7 +144,7 @@ def get_creation_time(path):
     try:
         return path.stat().st_birthtime
     except AttributeError:
-        return path.stat().st_ctime
+        return path.stat().st_mtime
 
 def sort_paths_by_date(paths, reverse=False):
     return sorted(
