@@ -140,11 +140,16 @@ def draw_caption(text):
         screen.blit(caption, (20, y + 5))
         y += font.get_height() + 5
 
+def get_creation_time(path):
+    try:
+        return path.stat().st_birthtime
+    except AttributeError:
+        return path.stat().st_ctime
 
 def sort_paths_by_date(paths, reverse=False):
     return sorted(
         paths,
-        key=lambda p: p.stat().st_birthtime,
+        key=get_creation_time,
         reverse=reverse
     )
 
